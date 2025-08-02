@@ -23,7 +23,8 @@ enum class ProxyType
     SOCKS5,
     WireGuard,
     Hysteria,
-    Hysteria2
+    Hysteria2,
+    Direct
 };
 
 inline String getProxyTypeName(ProxyType type)
@@ -52,6 +53,8 @@ inline String getProxyTypeName(ProxyType type)
         return "Hysteria";
     case ProxyType::Hysteria2:
         return "Hysteria2";
+    case ProxyType::Direct:
+        return "Direct";
     default:
         return "Unknown";
     }
@@ -98,7 +101,8 @@ struct Proxy
 
     uint16_t SnellVersion = 0;
     String ServerName;
-
+    String Interface;
+    
     String SelfIP;
     String SelfIPv6;
     String PublicKey;

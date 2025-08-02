@@ -619,6 +619,15 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 singleproxy["hop-interval"] = x.HopInterval;
 
             break;
+
+        case ProxyType::Direct:
+            singleproxy["type"] = "direct";
+            if(!x.Interface.empty())
+                singleproxy["interface-name"] = x.Interface;
+            singleproxy.remove("server");
+            singleproxy.remove("port");
+            break;
+            
         default:
             continue;
         }
@@ -1106,9 +1115,15 @@ std::string proxyToSurge(std::vector<Proxy> &nodes, const std::string &base_conf
             if(udp)
                 proxy += ", udp=true";
             break;
+        case ProxyType::Direct:
+            proxy = "direct";
+            if(!x.Interface.empty())
+                proxy += ", interface=" + x.Interface;
+            break;
         default:
             continue;
         }
+
 
         if(!ext.tfo.is_undef())
             proxy += ", tfo=" + ext.tfo.get_str();

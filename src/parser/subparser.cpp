@@ -1128,7 +1128,7 @@ void explodeNetch(std::string netch, Proxy &node)
 
 void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
 {
-    std::string proxytype, ps, server, port, cipher, group, password, underlying_proxy; //common
+    std::string proxytype, ps, server, port, interface, cipher, group, password, underlying_proxy; //common
     std::string type = "none", id, aid = "0", net = "tcp", path, host, edge, tls, sni; //vmess
     std::string plugin, pluginopts, pluginopts_mode, pluginopts_host, pluginopts_mux; //ss
     std::string protocol, protoparam, obfs, obfsparam; //ssr
@@ -1149,8 +1149,9 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
         singleproxy["name"] >>= ps;
         singleproxy["server"] >>= server;
         singleproxy["port"] >>= port;
+        singleproxy["interface-name"] >>= interface;
         singleproxy["underlying-proxy"] >>= underlying_proxy;
-        if(port.empty() || port == "0")
+        if((port.empty() || port == "0") && proxytype != "direct")
             continue;
         udp = safe_as<std::string>(singleproxy["udp"]);
         tfo = safe_as<std::string>(singleproxy["fast-open"]);
@@ -1422,11 +1423,21 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
                    tfo, scv, udp, underlying_proxy);
             break;
 
+        case "direct"_hash:
+            node.Type = ProxyType::Direct;
+            node.Remark = ps;
+            node.UDP = udp;
+            node.TCPFastOpen = tfo;
+            node.AllowInsecure = scv;
+            node.UnderlyingProxy = underlying_proxy;
+            break;
+    break;
         default:
             continue;
         }
 
         node.Id = index;
+        node.Interface = interface;
         nodes.emplace_back(std::move(node));
         index++;
     }
@@ -1707,6 +1718,7 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
         std::string version, aead = "1";
         std::string itemName, itemVal, config;
         std::vector<std::string> configs, vArray, headers, header;
+        std::string interface;
         tribool udp, tfo, scv, tls13;
         Proxy node;
 
@@ -1716,11 +1728,43 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
         */
         regGetMatch(x.second, proxystr, 3, 0, &remarks, &config);
         configs = split(config, ",");
-        if(configs.size() < 3)
+        if(configs.empty())
             continue;
         switch(hash_(configs[0]))
         {
         case "direct"_hash:
+            node.Type = ProxyType::Direct;
+            node.Remark = remarks;
+            interface.clear();
+            for(i = 1; i < configs.size(); i++)
+            {
+                vArray = split(configs[i], "=");
+                if(vArray.size() != 2) continue;
+                itemName = trim(vArray[0]);
+                itemVal = trim(vArray[1]);
+                switch(hash_(itemName))
+                {
+                case "interface"_hash:
+                    interface = itemVal;
+                    break;
+                case "udp-relay"_hash:
+                    udp = itemVal;
+                    break;
+                case "tfo"_hash:
+                    tfo = itemVal;
+                    break;
+                case "skip-cert-verify"_hash:
+                    scv = itemVal;
+                    break;
+                default:
+                    addExtraField(node, itemName, itemVal);
+                    break;
+                }
+            }
+            node.UDP = udp;
+            node.TCPFastOpen = tfo;
+            node.AllowInsecure = scv;
+            break;
         case "reject"_hash:
         case "reject-tinygif"_hash:
             continue;
@@ -2475,6 +2519,7 @@ bool explodeSurge(std::string surge, std::vector<Proxy> &nodes)
         }
 
         node.Id = index;
+        node.Interface = interface;
         nodes.emplace_back(std::move(node));
         index++;
     }
