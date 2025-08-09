@@ -393,6 +393,7 @@ void readYAMLConf(YAML::Node &node)
     {
         section = node["managed_config"];
         section["write_managed_config"] >> global.writeManagedConfig;
+        section["managed_config_url"] >> global.managedConfigUrl;
         section["managed_config_prefix"] >> global.managedConfigPrefix;
         section["config_update_interval"] >> global.updateInterval;
         section["config_update_strict"] >> global.updateStrict;
@@ -653,6 +654,7 @@ void readTOMLConf(toml::value &root)
     find_if_exist(section_managed,
                   "write_managed_config", global.writeManagedConfig,
                   "managed_config_prefix", global.managedConfigPrefix,
+                  "managed_config_url", global.managedConfigUrl,
                   "config_update_interval", global.updateInterval,
                   "config_update_strict", global.updateStrict,
                   "quanx_device_id", global.quanXDevID
@@ -923,6 +925,7 @@ void readConf()
     ini.enter_section("managed_config");
     ini.get_bool_if_exist("write_managed_config", global.writeManagedConfig);
     ini.get_if_exist("managed_config_prefix", global.managedConfigPrefix);
+    ini.get_if_exist("managed_config_url", global.managedConfigUrl);
     ini.get_int_if_exist("config_update_interval", global.updateInterval);
     ini.get_bool_if_exist("config_update_strict", global.updateStrict);
     ini.get_if_exist("quanx_device_id", global.quanXDevID);
@@ -995,6 +998,7 @@ void readConf()
         global.templateVars[x.first] = x.second;
     }
     global.templateVars["managed_config_prefix"] = global.managedConfigPrefix;
+    global.templateVars["managed_config_url"] = global.managedConfigUrl;
 
     if(ini.section_exist("aliases"))
     {
@@ -1249,6 +1253,9 @@ int loadExternalConfig(std::string &path, ExternalConfig &ext)
         importItems(vArray, global.APIMode);
         ext.custom_proxy_group = INIBinding::from<ProxyGroupConfig>::from_ini(vArray);
     }
+
+    ini.get_if_exist("managed_config_url", ext.managed_config_url);
+
     std::string ruleset_name = ini.item_prefix_exist("ruleset") ? "ruleset" : "surge_ruleset";
     if(ini.item_prefix_exist(ruleset_name))
     {
