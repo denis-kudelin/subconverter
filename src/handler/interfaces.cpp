@@ -492,6 +492,8 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
             argRemoveEmoji.define(extconf.remove_old_emoji);
             if(!extconf.managed_config_url.empty())
                 ext.managed_config_url = extconf.managed_config_url;
+            if(!extconf.general.empty())
+                ext.general = extconf.general;
         }
     }
     else

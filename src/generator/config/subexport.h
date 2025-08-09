@@ -34,6 +34,7 @@ struct extra_settings
     std::string managed_config_prefix;
     std::string managed_config_url;
     std::string quanx_dev_id;
+    string_map general;
     tribool udp = tribool();
     tribool tfo = tribool();
     tribool skip_cert_verify = tribool();
