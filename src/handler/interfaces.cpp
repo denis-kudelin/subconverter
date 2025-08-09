@@ -478,7 +478,6 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
                     ext.enable_rule_generator = extconf.enable_rule_generator;
                     ext.overwrite_original_rules = extconf.overwrite_original_rules;
                     ext.embed_remote_rules = extconf.embed_remote_rules;
-                    ext.managed_config_url = extconf.managed_config_url;
                 }
             }
             if(!extconf.rename.empty())
@@ -491,6 +490,8 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
                 lExcludeRemarks = extconf.exclude;
             argAddEmoji.define(extconf.add_emoji);
             argRemoveEmoji.define(extconf.remove_old_emoji);
+            if(!extconf.managed_config_url.empty())
+                ext.managed_config_url = extconf.managed_config_url;
         }
     }
     else
@@ -761,9 +762,12 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
     std::vector<RulesetContent> dummy_ruleset;
     std::string managed_url = base64Decode(getUrlArg(argument, "profile_data"));
     if(managed_url.empty())
-        managed_url = global.managedConfigPrefix + "/sub?" + joinArguments(argument);
-    if(managed_url.empty() && !ext.managed_config_url.empty())
-        managed_url = ext.managed_config_url;
+    {
+        if(!ext.managed_config_url.empty())
+            managed_url = ext.managed_config_url;
+        else if(!global.managedConfigPrefix.empty())
+            managed_url = global.managedConfigPrefix + "/sub?" + joinArguments(argument);
+    }
 
     //std::cerr<<"Generate target: ";
     proxy = parseProxy(global.proxyConfig);
@@ -821,7 +825,7 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
             if(argUpload)
                 uploadGist("surge" + argSurgeVer, argUploadPath, output_content, true);
 
-            if(global.writeManagedConfig && !global.managedConfigPrefix.empty())
+            if(global.writeManagedConfig && !managed_url.empty())
                 output_content = "#!MANAGED-CONFIG " + managed_url + (interval ? " interval=" + std::to_string(interval) : "") \
                  + " strict=" + std::string(strict ? "true" : "false") + "\n\n" + output_content;
         }
@@ -838,7 +842,7 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
         if(argUpload)
             uploadGist("surfboard", argUploadPath, output_content, true);
 
-        if(global.writeManagedConfig && !global.managedConfigPrefix.empty())
+        if(global.writeManagedConfig && !managed_url.empty())
             output_content = "#!MANAGED-CONFIG " + managed_url + (interval ? " interval=" + std::to_string(interval) : "") \
                  + " strict=" + std::string(strict ? "true" : "false") + "\n\n" + output_content;
         break;
