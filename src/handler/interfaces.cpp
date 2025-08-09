@@ -761,10 +761,13 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
     ProxyGroupConfigs dummy_group;
     std::vector<RulesetContent> dummy_ruleset;
     std::string managed_url = base64Decode(getUrlArg(argument, "profile_data"));
-    if(managed_url.empty() && !global.managedConfigPrefix.empty())
-        managed_url = global.managedConfigPrefix + "/sub?" + joinArguments(argument);
     if(managed_url.empty())
-        managed_url = ext.managed_config_url;
+    {
+        if(!ext.managed_config_url.empty())
+            managed_url = ext.managed_config_url;
+        else if(!global.managedConfigPrefix.empty())
+            managed_url = global.managedConfigPrefix + "/sub?" + joinArguments(argument);
+    }
 
     //std::cerr<<"Generate target: ";
     proxy = parseProxy(global.proxyConfig);
