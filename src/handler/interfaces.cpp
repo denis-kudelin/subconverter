@@ -478,7 +478,6 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
                     ext.enable_rule_generator = extconf.enable_rule_generator;
                     ext.overwrite_original_rules = extconf.overwrite_original_rules;
                     ext.embed_remote_rules = extconf.embed_remote_rules;
-                    ext.managed_config_url = extconf.managed_config_url;
                 }
             }
             if(!extconf.rename.empty())
@@ -491,6 +490,8 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
                 lExcludeRemarks = extconf.exclude;
             argAddEmoji.define(extconf.add_emoji);
             argRemoveEmoji.define(extconf.remove_old_emoji);
+            if(!extconf.managed_config_url.empty())
+                ext.managed_config_url = extconf.managed_config_url;
         }
     }
     else
