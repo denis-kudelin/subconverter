@@ -760,9 +760,9 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
     ProxyGroupConfigs dummy_group;
     std::vector<RulesetContent> dummy_ruleset;
     std::string managed_url = base64Decode(getUrlArg(argument, "profile_data"));
-    if(managed_url.empty())
+    if(managed_url.empty() && !global.managedConfigPrefix.empty())
         managed_url = global.managedConfigPrefix + "/sub?" + joinArguments(argument);
-    if(managed_url.empty() && !ext.managed_config_url.empty())
+    if(managed_url.empty())
         managed_url = ext.managed_config_url;
 
     //std::cerr<<"Generate target: ";
@@ -821,7 +821,7 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
             if(argUpload)
                 uploadGist("surge" + argSurgeVer, argUploadPath, output_content, true);
 
-            if(global.writeManagedConfig && !global.managedConfigPrefix.empty())
+            if(global.writeManagedConfig && !managed_url.empty())
                 output_content = "#!MANAGED-CONFIG " + managed_url + (interval ? " interval=" + std::to_string(interval) : "") \
                  + " strict=" + std::string(strict ? "true" : "false") + "\n\n" + output_content;
         }
@@ -838,7 +838,7 @@ std::string subconverter(RESPONSE_CALLBACK_ARGS)
         if(argUpload)
             uploadGist("surfboard", argUploadPath, output_content, true);
 
-        if(global.writeManagedConfig && !global.managedConfigPrefix.empty())
+        if(global.writeManagedConfig && !managed_url.empty())
             output_content = "#!MANAGED-CONFIG " + managed_url + (interval ? " interval=" + std::to_string(interval) : "") \
                  + " strict=" + std::string(strict ? "true" : "false") + "\n\n" + output_content;
         break;
