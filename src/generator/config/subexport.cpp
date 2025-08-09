@@ -897,6 +897,14 @@ std::string proxyToSurge(std::vector<Proxy> &nodes, const std::string &base_conf
         return "";
     }
 
+    if(!ext.general.empty())
+        for(auto &p : ext.general)
+        {
+            while(ini.item_exist("General", p.first))
+                ini.erase_first("General", p.first);
+            ini.set("General", p.first, p.second);
+        }
+
     ini.set_current_section("Proxy");
     ini.erase_section();
     ini.set("{NONAME}", "DIRECT = direct");
@@ -1636,6 +1644,14 @@ std::string proxyToQuanX(std::vector<Proxy> &nodes, const std::string &base_conf
         writeLog(0, "QuantumultX base loader failed with error: " + ini.get_last_error(), LOG_LEVEL_ERROR);
         return "";
     }
+
+    if(!ext.general.empty())
+        for(auto &p : ext.general)
+        {
+            while(ini.item_exist("general", p.first))
+                ini.erase_first("general", p.first);
+            ini.set("general", p.first, p.second);
+        }
 
     proxyToQuanX(nodes, ini, ruleset_content_array, extra_proxy_group, ext);
 

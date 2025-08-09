@@ -1305,6 +1305,23 @@ int loadExternalConfig(std::string &path, ExternalConfig &ext)
     if(ini.item_prefix_exist("exclude_remarks"))
         ini.get_all("exclude_remarks", ext.exclude);
 
+    if(ini.section_exist("General"))
+    {
+        ini.enter_section("General");
+        string_multimap tempmap;
+        ini.get_items(tempmap);
+        for(auto &x : tempmap)
+            ext.general[x.first] = x.second;
+    }
+    else if(ini.section_exist("general"))
+    {
+        ini.enter_section("general");
+        string_multimap tempmap;
+        ini.get_items(tempmap);
+        for(auto &x : tempmap)
+            ext.general[x.first] = x.second;
+    }
+
     if(ini.section_exist("template") && ext.tpl_args != nullptr)
     {
         ini.enter_section("template");

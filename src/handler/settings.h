@@ -90,6 +90,7 @@ struct ExternalConfig
     RegexMatchConfigs emoji;
     string_array include;
     string_array exclude;
+    string_map general;
     template_args *tpl_args = nullptr;
     bool overwrite_original_rules = false;
     bool embed_remote_rules = false;
