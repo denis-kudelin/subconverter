@@ -248,7 +248,7 @@ void readRuleset(YAML::Node node, string_array &dest, bool scope_limit = true)
 void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &ruleset_content_array)
 {
     eraseElements(ruleset_content_array);
-    std::string rule_group, rule_url, rule_url_typed, interval;
+    std::string rule_group, rule_url, rule_url_typed, flags;
     RulesetContent rc;
 
     std::string proxy = parseProxy(global.proxyRuleset);
@@ -257,11 +257,18 @@ void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &
     {
         rule_group = x.Group;
         rule_url = x.Url;
-        std::string::size_type pos = x.Url.find("[]");
+        flags.clear();
+        std::string::size_type fpos = rule_url.rfind(",flags=");
+        if(fpos != std::string::npos)
+        {
+            flags = rule_url.substr(fpos + 7);
+            rule_url.erase(fpos);
+        }
+        std::string::size_type pos = rule_url.find("[]");
         if(pos != std::string::npos)
         {
             writeLog(0, "Adding rule '" + rule_url.substr(pos + 2) + "," + rule_group + "'.", LOG_LEVEL_INFO);
-            rc = {rule_group, "", "", RULESET_SURGE, std::async(std::launch::async, [=](){return rule_url.substr(pos);}), 0};
+            rc = {rule_group, "", "", flags, RULESET_SURGE, std::async(std::launch::async, [=](){return rule_url.substr(pos);}), 0};
         }
         else
         {
@@ -274,7 +281,7 @@ void refreshRulesets(RulesetConfigs &ruleset_list, std::vector<RulesetContent> &
                 type = iter->second;
             }
             writeLog(0, "Updating ruleset url '" + rule_url + "' with group '" + rule_group + "'.", LOG_LEVEL_INFO);
-            rc = {rule_group, rule_url, rule_url_typed, type, fetchFileAsync(rule_url, proxy, global.cacheRuleset, true, global.asyncFetchRuleset), x.Interval};
+            rc = {rule_group, rule_url, rule_url_typed, flags, type, fetchFileAsync(rule_url, proxy, global.cacheRuleset, true, global.asyncFetchRuleset), x.Interval};
         }
         ruleset_content_array.emplace_back(std::move(rc));
     }
