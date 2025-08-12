@@ -852,6 +852,7 @@ std::string proxyToClash(std::vector<Proxy> &nodes, const std::string &base_conf
 }
 
 // peer = (public-key = bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=, allowed-ips = "0.0.0.0/0, ::/0", endpoint = engage.cloudflareclient.com:2408, client-id = 139/184/125),(public-key = bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=, endpoint = engage.cloudflareclient.com:2408)
+
 std::string generatePeer(Proxy &node, bool client_id_as_reserved = false)
 {
     std::string result;
@@ -871,6 +872,47 @@ std::string generatePeer(Proxy &node, bool client_id_as_reserved = false)
             result += ", client-id=\"" + node.ClientId + "\"";
     }
     return result;
+}
+
+static void surgeApplyRulesetFlags(INIReader &ini)
+{
+    string_multimap items;
+    ini.set_current_section("Rule");
+    ini.get_items(items);
+    if(items.empty())
+        return;
+
+    ini.erase_section();
+
+    auto process = [&](std::string line)
+    {
+        if(startsWith(line, "RULE-SET,") || startsWith(line, "DOMAIN-SET,"))
+        {
+            ini.set("{NONAME}", line);
+            return;
+        }
+
+        size_t first = line.find(',');
+        if(first == std::string::npos)
+        {
+            ini.set("{NONAME}", line);
+            return;
+        }
+        std::string type = line.substr(0, first);
+        size_t second = line.find(',', first + 1);
+        std::string pattern = second == std::string::npos ? line.substr(first + 1) : line.substr(first + 1, second - first - 1);
+
+        if(type == "DOMAIN" && (pattern.find('*') != std::string::npos || pattern.find('?') != std::string::npos))
+        {
+            type = "DOMAIN-WILDCARD";
+            line.replace(0, first, type);
+        }
+
+        ini.set("{NONAME}", line);
+    };
+
+    for(const auto &kv : items)
+        process(kv.second);
 }
 
 std::string proxyToSurge(std::vector<Proxy> &nodes, const std::string &base_conf, std::vector<RulesetContent> &ruleset_content_array, const ProxyGroupConfigs &extra_proxy_group, int surge_ver, extra_settings &ext)
@@ -1239,6 +1281,7 @@ std::string proxyToSurge(std::vector<Proxy> &nodes, const std::string &base_conf
     if(ext.enable_rule_generator)
         rulesetToSurge(ini, ruleset_content_array, surge_ver, ext.overwrite_original_rules, ext.managed_config_prefix, ext.embed_remote_rules);
 
+    surgeApplyRulesetFlags(ini);
     return ini.to_string();
 }
 
