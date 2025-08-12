@@ -393,10 +393,12 @@ void rulesetToSurge(INIReader &base_rule, std::vector<RulesetContent> &ruleset_c
         std::string flags_a = extract_flags_from_tail(rule_path);
         std::string flags_b = extract_flags_from_tail(rule_path_typed);
         std::string merged_flags;
-        if(!flags_a.empty() && !flags_b.empty())
-            merged_flags = flags_b + "|" + flags_a;
-        else
-            merged_flags = !flags_b.empty() ? flags_b : flags_a;
+        if(!flags_b.empty())
+            merged_flags = flags_b;
+        if(!flags_a.empty())
+            merged_flags += (merged_flags.empty() ? "" : "|") + flags_a;
+        if(!x.flags.empty())
+            merged_flags += (merged_flags.empty() ? "" : "|") + x.flags;
 
         if(rule_path.empty())
         {
