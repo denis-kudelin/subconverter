@@ -1447,6 +1447,7 @@ http://127.0.0.1:25500/getruleset?type=%TYPE%&url=%URL%&group=%GROUP%
 
 ## 其他特性
 
+- 支持 Stash 作为源和目标格式。
 - `managed_config_url` 可设定托管配置的完整链接。
 - `embed_remote_rules` 启用后会将远程规则直接嵌入输出。
 - 规则集链接支持 `,flags=` 参数以附加 Surge 风格标志。

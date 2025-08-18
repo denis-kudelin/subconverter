@@ -114,6 +114,7 @@ token = xxxxxxxxxxxxxxxxxxxxxxxx(Your Personal Access Token)
 
 ## Additional Features
 
+- Stash is available as both a source and target format.
 - `managed_config_url` specifies the full link used for managed configuration headers.
 - `embed_remote_rules` embeds remote ruleset contents directly into the generated profile.
 - Rule URLs accept an optional `,flags=` parameter for Surge style rule-set flags.
