@@ -1359,7 +1359,7 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
 
             snellConstruct(node, group, ps, server, port, password, obfs, host, to_int(aid, 0), udp, tfo, scv, underlying_proxy);
             break;
-        case "wireguard"_hash:
+        case "wireguard"_hash: {
             group = WG_DEFAULT_GROUP;
             singleproxy["public-key"] >>= public_key;
             singleproxy["private-key"] >>= private_key;
@@ -1381,6 +1381,7 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
 
             wireguardConstruct(node, group, ps, server, port, ip, ipv6, private_key, public_key, password, dns_server, mtu, "0", "", "", udp, underlying_proxy);
             break;
+        }
         case "hysteria"_hash:
             group = HYSTERIA_DEFAULT_GROUP;
             singleproxy["ports"] >>= ports;
@@ -1452,7 +1453,6 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
             node.AllowInsecure = scv;
             node.UnderlyingProxy = underlying_proxy;
             break;
-    break;
         default:
             continue;
         }
