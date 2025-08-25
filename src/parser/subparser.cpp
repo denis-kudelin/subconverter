@@ -1144,12 +1144,14 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
     for(uint32_t i = 0; i < yamlnode[section].size(); i++)
     {
         Proxy node;
+        dns_server.clear();
         singleproxy = yamlnode[section][i];
         singleproxy["type"] >>= proxytype;
         singleproxy["name"] >>= ps;
         singleproxy["server"] >>= server;
         singleproxy["port"] >>= port;
         singleproxy["interface-name"] >>= interface;
+        singleproxy["dns-server"] >>= dns_server;
         singleproxy["underlying-proxy"] >>= underlying_proxy;
         if((port.empty() || port == "0") && proxytype != "direct")
             continue;
@@ -1438,6 +1440,7 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
 
         node.Id = index;
         node.Interface = interface;
+        node.DnsServers = dns_server;
         nodes.emplace_back(std::move(node));
         index++;
     }
