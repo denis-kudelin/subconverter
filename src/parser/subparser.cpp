@@ -1363,7 +1363,17 @@ void explodeClash(Node yamlnode, std::vector<Proxy> &nodes)
             group = WG_DEFAULT_GROUP;
             singleproxy["public-key"] >>= public_key;
             singleproxy["private-key"] >>= private_key;
-            singleproxy["dns"] >>= dns_server;
+            auto dnsnode2 = singleproxy["dns"];
+            if(dnsnode2.IsSequence()){
+                string_array extra_dns;
+                dnsnode2 >>= extra_dns;
+                dns_server.insert(dns_server.end(), extra_dns.begin(), extra_dns.end());
+            } else {
+                std::string dns;
+                dnsnode2 >>= dns;
+                if(!dns.empty())
+                    dns_server.emplace_back(dns);
+            }
             singleproxy["mtu"] >>= mtu;
             singleproxy["preshared-key"] >>= password;
             singleproxy["ip"] >>= ip;
